@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Work Bingo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2a2418; --dim: #6b604a; --green: #86BC25; --green-d: #5a7f14; --neon: #86EB22; --paper: #FFF4D6;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; min-height: 100%; color: var(--ink); background: var(--paper); font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  .bg { position: fixed; inset: 0; z-index: 0; background:
+      radial-gradient(circle at 12% 18%, #FFE29A 0 60px, transparent 61px), radial-gradient(circle at 90% 12%, #FFD0B5 0 90px, transparent 91px),
+      radial-gradient(circle at 85% 88%, #E4F1C2 0 110px, transparent 111px), radial-gradient(circle at 8% 90%, #FFE9B8 0 80px, transparent 81px), var(--paper); }
+  main { position: relative; z-index: 1; min-height: 100vh; box-sizing: border-box; padding: 64px 16px calc(env(safe-area-inset-bottom, 0px) + 28px); display: flex; flex-direction: column; align-items: center; }
+  .mark { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 16px; display: flex; align-items: center; gap: 9px; padding: 7px 14px 7px 12px; border-radius: 999px; background: rgba(255,255,255,.85); font-size: .85rem; color: var(--dim); }
+  .mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+  .wrap { width: min(470px, 100%); text-align: center; }
+  h1 { margin: 0; font-weight: 800; letter-spacing: -.02em; line-height: 1; font-size: clamp(2.4rem, 9vw, 3.4rem); }
+  h1 span { color: var(--green-d); }
+  h2 { margin: 0; font-weight: 800; font-size: 1.8rem; line-height: 1.1; letter-spacing: -.01em; }
+  .sub { margin: 12px auto 0; max-width: 40ch; color: var(--dim); font-size: 1rem; line-height: 1.5; }
+  .fine { margin: 14px 0 0; font-size: .82rem; color: var(--dim); }
+  .status { display: flex; justify-content: space-between; margin: 18px 4px 8px; font-size: .92rem; font-weight: 700; color: var(--ink); }
+  .status span:last-child { color: var(--green-d); }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .sq { position: relative; aspect-ratio: 1 / 1; min-height: 76px; padding: 6px; border-radius: 14px; border: 2px solid #E6D9B4; background: #fff; color: var(--ink); font: inherit; font-size: clamp(.68rem, 2.9vw, .88rem); font-weight: 600; line-height: 1.2; cursor: pointer; display: grid; place-items: center; transition: transform .12s, border-color .2s, background .2s, box-shadow .2s; }
+  .sq:hover { transform: translateY(-2px); border-color: var(--green); }
+  .sq:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .sq[aria-pressed="true"] { background: #F3FAE3; border-color: var(--green); }
+  .stamp { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; opacity: 0; }
+  .stamp svg { width: 62%; height: 62%; }
+  .sq[aria-pressed="true"] .stamp { opacity: 1; animation: stamp .35s cubic-bezier(.2,1.4,.4,1) both; }
+  .sq[aria-pressed="true"] .t { opacity: .38; }
+  .sq.line { border-color: var(--green-d); box-shadow: 0 0 0 3px rgba(134,188,37,.45); background: #E6F5C4; }
+  @keyframes stamp { from { transform: scale(1.9) rotate(-18deg); opacity: 0; } to { transform: scale(1) rotate(-6deg); opacity: 1; } }
+
+  .banner { position: fixed; left: 50%; top: 28%; transform: translateX(-50%); z-index: 5; pointer-events: none; text-align: center; }
+  .banner b { display: inline-block; font-size: clamp(3rem, 14vw, 5.4rem); font-weight: 800; color: var(--green-d); letter-spacing: -.02em; text-shadow: 0 4px 0 #fff, 0 10px 30px rgba(90,127,20,.35); animation: pop .6s cubic-bezier(.2,1.5,.4,1) both; }
+  .banner i { position: absolute; top: 0; width: 10px; height: 10px; border-radius: 3px; animation: fall 1.8s ease-in forwards; }
+  @keyframes pop { from { transform: scale(.3) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(-3deg); opacity: 1; } }
+  @keyframes fall { from { transform: translateY(0) rotate(0); opacity: 1; } to { transform: translateY(260px) rotate(300deg); opacity: 0; } }
+
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+  button { font: inherit; cursor: pointer; }
+  .btn { color: #11150a; background: var(--green); border: 0; border-radius: 999px; padding: 14px 28px; min-height: 52px; font-size: 1.02rem; font-weight: 700; box-shadow: 0 8px 18px rgba(90,127,20,.25); transition: transform .15s, background .2s, opacity .2s; }
+  .btn:hover:not(:disabled) { background: var(--neon); transform: translateY(-1px); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+  .btn.ghost { background: rgba(255,255,255,.85); color: var(--ink); border: 1px solid rgba(42,36,24,.25); box-shadow: none; font-weight: 600; }
+
+  /* result */
+  .card { background: #fff; border-radius: 26px; padding: 24px 20px 22px; text-align: left; box-shadow: 0 16px 44px rgba(90,70,20,.18); animation: rise .5s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .tag { font-size: .76rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--green-d); }
+  .tier { margin: 4px 0 6px; } .line1 { color: var(--dim); line-height: 1.45; }
+  .nums { display: flex; gap: 10px; margin: 16px 0 4px; } .nums div { flex: 1; background: #FBF6E6; border-radius: 16px; padding: 12px 8px; text-align: center; } .nums b { display: block; font-size: 1.7rem; font-weight: 800; } .nums span { font-size: .8rem; color: var(--dim); }
+  .fix { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: #F1F7E4; border-left: 4px solid var(--green); font-size: .95rem; line-height: 1.45; } .fix b { display: block; color: var(--green-d); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+  .why { margin-top: 16px; font-size: .88rem; color: var(--dim); line-height: 1.5; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .sq, .card, .stamp, .banner b, .banner i { animation: none !important; transition: none; } .sq[aria-pressed="true"] .stamp { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<main>
+  <div class="mark"><i></i><span>Day 4</span></div>
+
+  <section class="wrap" id="play">
+    <h1>Work <span>Bingo</span></h1>
+    <p class="sub">Tap every square that sounds like your week. Get a line, shout BINGO. (Quietly. You're at work.)</p>
+    <div class="status"><span id="count">0 of 16</span><span id="lines">0 bingos</span></div>
+    <div class="grid" id="grid" role="group" aria-label="Bingo card"></div>
+    <div class="row"><button class="btn" id="see" disabled>See my result</button><button class="btn ghost" id="newcard">New card</button></div>
+    <p class="fine">No sign-in. Nothing saved.</p>
+  </section>
+
+  <section class="wrap" id="res" hidden aria-live="polite">
+    <div class="card">
+      <div class="tag">Your week, as weather</div>
+      <h2 class="tier" id="tier"></h2>
+      <div class="line1" id="tierLine"></div>
+      <div class="nums"><div><b id="nSq">0</b><span>squares</span></div><div><b id="nLn">0</b><span>bingos</span></div></div>
+      <div id="fixes"></div>
+      <p class="why"><b>What's it for?</b> Seeing your week written down makes it easier to laugh at, and easier to change one small thing. That's all.</p>
+    </div>
+    <div class="row"><button class="btn" id="again">Play again</button><button class="btn ghost" id="copy">Copy my card</button><button class="btn ghost" id="back">Back to my card</button></div>
+  </section>
+</main>
+<div class="banner" id="banner" hidden aria-hidden="true"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // Every topic is a different subject. A card uses 16 different topics and ONE wording of each,
+  // so a card never has two squares about the same thing (for example, never two about meetings).
+  const Q = '\u201C', E = '\u201D';
+  const TOPICS = [
+    { c: 'meetings', v: ['Meeting that could be an email', Q + 'Sorry, I was on mute' + E, 'Back-to-back calls, no gap', 'Meeting with no agenda', 'Joined a call late'] },
+    { c: 'always',   v: ['Replied after 8 PM', 'Checked Teams on a weekend', 'Opened your laptop on a day off'] },
+    { c: 'always',   v: ['Phone buzzed, you looked', 'Ignored a ping, felt guilty', 'Ping at 6:55 PM'] },
+    { c: 'breaks',   v: ['Lunch at your desk', 'Ate lunch on a call', 'Skipped lunch completely'] },
+    { c: 'breaks',   v: ['Third coffee, no water', 'Forgot to drink water'] },
+    { c: 'breaks',   v: ['Sat 3 hours straight', 'Skipped your walk', "Didn't stand up once"] },
+    { c: 'overload', v: ['Lost the tab you needed', 'Tabs open since last week', 'Too many windows to find anything'] },
+    { c: 'overload', v: [Q + 'Quick task' + E + " that wasn't", Q + '5-minute fix' + E + ' took 2 hours'] },
+    { c: 'overload', v: ['Switched tasks 5 times in an hour', 'Forgot what you were doing mid-task'] },
+    { c: 'overload', v: ['Re-read one message 3 times', 'Read an email, took in nothing'] },
+    { c: 'overload', v: ['To-do longer than the day', 'Added tasks faster than you did them'] },
+    { c: 'overload', v: ['Said yes, meant no', 'Took on ' + Q + 'one more thing' + E] },
+    { c: 'overload', v: ['Hit reply-all by mistake', 'Typed a long message, deleted it'] },
+    { c: 'body',     v: ['Eyes tired from screens', 'Squinting at the screen by evening'] },
+    { c: 'body',     v: ['Neck or back aching', 'Hunched over your laptop'] },
+    { c: 'body',     v: ['Slept less than you wanted', 'Woke up thinking about work'] },
+    { c: 'pressure', v: [Q + 'Urgent' + E + " that wasn't urgent", 'Deadline moved to ' + Q + 'ASAP' + E] },
+    { c: 'pressure', v: ['Felt behind on everything', "Wondered if you're doing enough"] },
+    { c: 'tech',     v: ['Stared at a loading spinner', 'Waited on a build or deploy'] },
+    { c: 'tech',     v: ['Googled the same error again', 'Fixed it by restarting it', "Numbers didn't match, again"] },
+    { c: 'joy',      v: ['Scrolled instead of resting', 'Opened your phone ' + Q + 'for a second' + E] },
+    { c: 'joy',      v: ['Nothing today just for you', 'Skipped something you enjoy'] },
+    { c: 'joy',      v: ['Got irritated by something tiny', 'Sighed at your screen'] }
+  ];
+  const FIX = {
+    meetings: ['Meetings', "Pick one meeting today and ask if there's an agenda. If not, suggest 15 minutes instead of 30."],
+    always:   ['Always on', 'Choose a "close Teams" time tonight and tell one person. That is the whole fix.'],
+    breaks:   ['Breaks', 'Put a 5-minute gap after your next two meetings. Stand up, look far away, drink some water.'],
+    overload: ['Too much at once', "Write down your top 3 for tomorrow. Everything else is a 'maybe'."],
+    body:     ['Your body', 'Stand up, roll your shoulders back and look at something far away for 20 seconds. Tonight, put your phone down 30 minutes before bed.'],
+    pressure: ['Pressure', "Before the next 'urgent' thing, ask: what happens if this waits until tomorrow? Often, nothing."],
+    tech:     ['Waiting on tech', "Next time you're waiting on a build or a loading spinner, don't open another task. Look away and take one slow breath."],
+    joy:      ['Time for you', 'Pick one 10-minute thing that is only for you today, and put it in your calendar like a meeting.']
+  };
+  const TIERS = [
+    [2, 'Clear skies', 'Barely any. Teach us your ways.'],
+    [6, 'Light breeze', 'A few. Perfectly normal for a working week.'],
+    [10, 'Cloudy, with a chance of coffee', "Quite a few. You're carrying a lot."],
+    [13, 'Heavy weather', "That's a lot of squares. Go easy on yourself today."],
+    [16, 'Full storm', 'Nearly everything. Please be kind to yourself, and take one small break today.']
+  ];
+  const LINES = [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],[0,5,10,15],[3,6,9,12]];
+  const CHECK = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="rgba(134,188,37,.92)" stroke="#5a7f14" stroke-width="3"/><path d="M19 33l9 9 18-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  let card = [], marked = new Set(), doneLines = 0, bannerTimer = null;
+
+  function deal() {
+    const pick = shuffle(TOPICS.map((tp, k) => ({ k, c: tp.c }))).slice(0, 16).map(x => ({ k: x.k, c: x.c, t: TOPICS[x.k].v[Math.floor(Math.random() * TOPICS[x.k].v.length)] }));
+    card = shuffle(pick); marked = new Set(); doneLines = 0;
+    const g = $('grid'); g.innerHTML = '';
+    card.forEach((q, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'sq'; b.setAttribute('aria-pressed', 'false');
+      const t = document.createElement('span'); t.className = 't'; t.textContent = q.t;
+      const s = document.createElement('span'); s.className = 'stamp'; s.innerHTML = CHECK;
+      b.appendChild(t); b.appendChild(s);
+      b.addEventListener('click', () => toggle(i)); g.appendChild(b);
+    });
+    refresh(false);
+  }
+
+  function lineStates() { return LINES.map(l => l.every(i => marked.has(i))); }
+  function refresh(allowBanner) {
+    const sq = [...$('grid').children];
+    sq.forEach((b, i) => { b.setAttribute('aria-pressed', marked.has(i) ? 'true' : 'false'); b.classList.remove('line'); });
+    const st = lineStates(); let n = 0;
+    st.forEach((ok, k) => { if (ok) { n++; LINES[k].forEach(i => sq[i].classList.add('line')); } });
+    $('count').textContent = marked.size + ' of 16';
+    $('lines').textContent = n + (n === 1 ? ' bingo' : ' bingos');
+    $('see').disabled = marked.size === 0;
+    if (allowBanner && n > doneLines) bingo();
+    doneLines = n;
+  }
+  function toggle(i) { if (marked.has(i)) marked.delete(i); else marked.add(i); refresh(true); }
+
+  function bingo() {
+    const b = $('banner'); b.innerHTML = ''; b.hidden = false;
+    const t = document.createElement('b'); t.textContent = 'BINGO!'; b.appendChild(t);
+    const colors = ['#86BC25', '#FFD25A', '#F2A81D', '#4A9BD9', '#E85D5D'];
+    for (let k = 0; k < 18; k++) { const c = document.createElement('i'); c.style.left = (Math.random() * 100) + '%'; c.style.background = colors[k % colors.length]; c.style.animationDelay = (Math.random() * 0.5) + 's'; b.appendChild(c); }
+    clearTimeout(bannerTimer); bannerTimer = setTimeout(() => { b.hidden = true; }, 2200);
+  }
+
+  function result() {
+    const n = marked.size, lines = lineStates().filter(Boolean).length;
+    const tier = TIERS.find(x => n <= x[0]);
+    $('tier').textContent = tier[1]; $('tierLine').textContent = tier[2];
+    $('nSq').textContent = n; $('nLn').textContent = lines;
+    const counts = {}; marked.forEach(i => { counts[card[i].c] = (counts[card[i].c] || 0) + 1; });
+    const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 2);
+    const box = $('fixes'); box.innerHTML = '';
+    if (!top.length) { const d = document.createElement('div'); d.className = 'fix'; d.textContent = 'No squares ticked. Lucky you. Keep doing whatever you are doing.'; box.appendChild(d); }
+    top.forEach(c => { const d = document.createElement('div'); d.className = 'fix'; const h = document.createElement('b'); h.textContent = 'Tiny fix: ' + FIX[c][0]; const p = document.createElement('span'); p.textContent = FIX[c][1]; d.appendChild(h); d.appendChild(p); box.appendChild(d); });
+    $('copy').textContent = 'Copy my card';
+    $('play').hidden = true; $('res').hidden = false; window.scrollTo(0, 0);
+  }
+
+  function shareText() {
+    const rows = [0, 1, 2, 3].map(r => [0, 1, 2, 3].map(c => marked.has(r * 4 + c) ? '\u{1F7E9}' : '\u2B1C').join('')).join('\n');
+    const lines = lineStates().filter(Boolean).length;
+    return 'Work Bingo\n' + rows + '\n' + marked.size + ' of 16 squares, ' + lines + (lines === 1 ? ' bingo' : ' bingos') + '\n(From the AI & Data Chennai Cultural Club)';
+  }
+  async function copy() {
+    const text = shareText(); let ok = false;
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) { ok = false; }
+    if (!ok) { try { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta); } catch (e) { ok = false; } }
+    $('copy').textContent = ok ? 'Copied!' : 'Copy not available';
+  }
+
+  $('see').addEventListener('click', result);
+  $('newcard').addEventListener('click', deal);
+  $('again').addEventListener('click', () => { $('res').hidden = true; $('play').hidden = false; deal(); window.scrollTo(0, 0); });
+  $('back').addEventListener('click', () => { $('res').hidden = true; $('play').hidden = false; window.scrollTo(0, 0); });
+  $('copy').addEventListener('click', copy);
+  deal();
+})();
+</script>
+</body>
+</html>
